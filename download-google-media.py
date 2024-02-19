@@ -7,6 +7,8 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
+import traceback
+import logging
 
 # Define the scopes for accessing the APIs
 SCOPES = [    
@@ -80,31 +82,42 @@ def get_media_items(start_date, end_date):
 def download_media_items(media_items, folder):
     # Build the service object for the Google Drive API
     service = build('drive', 'v3', credentials=authorize())
+    c = 0
     # Loop through the media items
     for item in media_items:
-        # Get the file id and name from the item
-        file_name = item['filename']
-        download_flag =  ''
-        mime_type = item['mimeType']
-        if mime_type.startswith("image"):
-            download_flag = '=d'
-        elif mime_type.startswith("video"):
-            download_flag = '=dv'
-            
-        download_url = item['baseUrl'] + download_flag
+        try:
                 
-        # Create a request object to get the file content
-        content = requests.get(download_url).content
-        # Create a file handle to write the file content
-        with open(os.path.join(folder, file_name), 'wb') as f:
-            f.write(content)
-            print(f"Downloaded {file_name}")                        
+            c += 1
+            
+            # Get the file id and name from the item
+            file_name = item['filename']                
+            file_path = os.path.join(folder, file_name)
+            if os.path.exists(file_path):
+                print(f"{file_path} exists")
+                continue
+                            
+            download_flag =  ''
+            mime_type = item['mimeType']
+            if mime_type.startswith("image"):
+                download_flag = '=d'
+            elif mime_type.startswith("video"):
+                download_flag = '=dv'            
+            download_url = item['baseUrl'] + download_flag                
+            # Create a request object to get the file content
+            content = requests.get(download_url).content
+            # Create a file handle to write the file content
+            with open(file_path, 'wb') as f:
+                f.write(content)
+                print(f"Downloaded {file_name}: {c} of {len(media_items)}")   
+                
+        except Exception as e:
+            logging.error(traceback.format_exc())
         
 
 # Define the start and end dates for the date range
-start_date = datetime.date(2024, 1, 1)
-end_date = datetime.date(2024, 1, 31)
-
+start_date = datetime.date(2023, 4, 1)
+end_date = datetime.date(2023, 12, 31)
+print (f"Download files {start_date} - {end_date}")
 # Define the local folder to save the downloaded files
 folder = './images'
 
