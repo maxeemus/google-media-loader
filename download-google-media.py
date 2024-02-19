@@ -1,5 +1,4 @@
 # Import the required libraries
-import io
 import os
 import datetime
 import requests
@@ -11,18 +10,7 @@ import traceback
 import logging
 
 # Define the scopes for accessing the APIs
-SCOPES = [    
-    'https://www.googleapis.com/auth/photoslibrary',
-    'https://www.googleapis.com/auth/photoslibrary.readonly',
-    'https://www.googleapis.com/auth/photoslibrary.readonly.appcreateddata',
-    'https://www.googleapis.com/auth/drive',
-    'https://www.googleapis.com/auth/drive.appdata',
-    'https://www.googleapis.com/auth/drive.file',
-    'https://www.googleapis.com/auth/drive.metadata',
-    'https://www.googleapis.com/auth/drive.metadata.readonly',
-    'https://www.googleapis.com/auth/drive.photos.readonly',
-    'https://www.googleapis.com/auth/drive.readonly',
-]
+SCOPES = ['https://www.googleapis.com/auth/photoslibrary.readonly']
 
 # Create a function to authorize the access to the APIs
 def authorize():
