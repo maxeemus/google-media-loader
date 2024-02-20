@@ -1,6 +1,8 @@
 # Import the required libraries
-import os
 import datetime
+import calendar
+import argparse
+import os
 import requests
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -32,9 +34,12 @@ def authorize():
 
 # Create a function to get the media items from Google Photos for a given date range
 def get_media_items(start_date, end_date):
+    # Google cloud api authorize
+    creds = authorize()
+    
     print("photoslibrary api request...")
     # Build the service object for the Google Photos Library API
-    service = build('photoslibrary', 'v1', credentials=authorize(), static_discovery=False)
+    service = build('photoslibrary', 'v1', credentials=creds, static_discovery=False)
     # Create a filter object with the date range
     filters = {
         "dateFilter": {
@@ -56,6 +61,7 @@ def get_media_items(start_date, end_date):
     }
     # Create a request object with the filter    
     request = service.mediaItems().search(body={"filters": filters, "pageSize": 100})    
+    
     # Initialize an empty list to store the media items
     media_items = []
     # Loop through the pages of the response
@@ -66,6 +72,7 @@ def get_media_items(start_date, end_date):
         # Get the next page token
         request = service.mediaItems().list_next(request, response)
         print(f"{len(media_items)} media items found.")
+    
     return media_items
 
 # Create a function to download the media items from Google Drive to a local folder
@@ -102,16 +109,27 @@ def download_media_items(media_items, folder):
         except Exception as e:
             logging.error(traceback.format_exc())
         
+def main(start_date: datetime.date, end_date: datetime.date, folder: str):    
+    print (f"Download files {start_date} - {end_date} to {folder}")
 
-# Define the start and end dates for the date range
-start_date = datetime.date(2023, 1, 1)
-end_date = datetime.date(2023, 12, 31)
-print (f"Download files {start_date} - {end_date}")
-# Define the local folder to save the downloaded files
-folder = './images'
+    # Get the media items for the date range
+    media_items = get_media_items(start_date, end_date)
 
-# Get the media items for the date range
-media_items = get_media_items(start_date, end_date)
+    # Download the media items to the local folder
+    download_media_items(media_items, folder)
 
-# Download the media items to the local folder
-download_media_items(media_items, folder)
+if __name__ == "__main__":
+    today = datetime.date.today()
+    first_day = today.replace(day=1)
+    last_day = today.replace(day=calendar.monthrange(today.year, today.month)[1])
+    
+    parser = argparse.ArgumentParser(description='Optional app description')
+    parser.add_argument('--start-date', help='A required end date of range', nargs='?', default=str(first_day))
+    parser.add_argument('--end-date', help='A required end date of range', nargs='?', default=str(last_day))
+    parser.add_argument('--folder', help='Target folder', nargs='?', default='./images')
+    args = parser.parse_args()
+    
+    start_date = datetime.date.fromisoformat(args.start_date)
+    end_date = datetime.date.fromisoformat(args.end_date)
+        
+    main(start_date=start_date, end_date=end_date, folder=args.folder)
