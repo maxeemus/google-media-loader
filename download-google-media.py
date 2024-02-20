@@ -32,6 +32,7 @@ def authorize():
 
 # Create a function to get the media items from Google Photos for a given date range
 def get_media_items(start_date, end_date):
+    print("photoslibrary api request...")
     # Build the service object for the Google Photos Library API
     service = build('photoslibrary', 'v1', credentials=authorize(), static_discovery=False)
     # Create a filter object with the date range
@@ -53,23 +54,23 @@ def get_media_items(start_date, end_date):
             ]
         }
     }
-    # Create a request object with the filter
-    request = service.mediaItems().search(body={"filters": filters})
+    # Create a request object with the filter    
+    request = service.mediaItems().search(body={"filters": filters, "pageSize": 100})    
     # Initialize an empty list to store the media items
     media_items = []
     # Loop through the pages of the response
-    while request is not None:
-        response = request.execute()
+    while request is not None:        
+        response = request.execute()        
         # Append the media items to the list
         media_items.extend(response.get('mediaItems', []))
         # Get the next page token
         request = service.mediaItems().list_next(request, response)
+        print(f"{len(media_items)} media items found.")
     return media_items
 
 # Create a function to download the media items from Google Drive to a local folder
 def download_media_items(media_items, folder):
-    # Build the service object for the Google Drive API
-    service = build('drive', 'v3', credentials=authorize())
+    # Build the service object for the Google Drive API    
     c = 0
     # Loop through the media items
     for item in media_items:
@@ -81,7 +82,7 @@ def download_media_items(media_items, folder):
             file_name = item['filename']                
             file_path = os.path.join(folder, file_name)
             if os.path.exists(file_path):
-                print(f"{file_path} exists")
+                print(f"{file_name} exists: {c} of {len(media_items)}")
                 continue
                             
             download_flag =  ''
@@ -103,7 +104,7 @@ def download_media_items(media_items, folder):
         
 
 # Define the start and end dates for the date range
-start_date = datetime.date(2023, 4, 1)
+start_date = datetime.date(2023, 1, 1)
 end_date = datetime.date(2023, 12, 31)
 print (f"Download files {start_date} - {end_date}")
 # Define the local folder to save the downloaded files
