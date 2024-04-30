@@ -20,4 +20,5 @@ $lastDayString = $lastDayOfMonth.ToString("yyyy-MM-dd")
 
 python.exe .\download-google-media.py --start-date $firstDayString --end-date $lastDayString
 
- 
+
+.\.venv\Scripts\deactivate.bat 
