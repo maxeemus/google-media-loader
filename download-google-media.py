@@ -10,6 +10,7 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 import traceback
 import logging
+from slugify import slugify
 
 def main(start_date: datetime.date, end_date: datetime.date, folder: str):    
     # Define the scopes for accessing the APIs
@@ -87,7 +88,7 @@ def main(start_date: datetime.date, end_date: datetime.date, folder: str):
                 c += 1
                 
                 # Get the file id and name from the item
-                file_name = item['filename']                
+                file_name = slugify(item['filename'])
                 file_path = os.path.join(folder, file_name)
                 if os.path.exists(file_path):
                     print(f"{file_name} exists: {c} of {len(media_items)}")
