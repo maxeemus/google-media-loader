@@ -87,8 +87,8 @@ def main(start_date: datetime.date, end_date: datetime.date, folder: str):
                     
                 c += 1
                 
-                # Get the file id and name from the item
-                file_name = slugify(item['filename'])
+                # Get the file id and name from the item                
+                file_name = slugify_file_name(item['filename'])
                 file_path = os.path.join(folder, file_name)
                 if os.path.exists(file_path):
                     print(f"{file_name} exists: {c} of {len(media_items)}")
@@ -110,6 +110,7 @@ def main(start_date: datetime.date, end_date: datetime.date, folder: str):
                     
             except Exception as e:
                 logging.error(traceback.format_exc())
+
             
     print (f"Download files {start_date} - {end_date} to {folder}")
 
@@ -118,6 +119,12 @@ def main(start_date: datetime.date, end_date: datetime.date, folder: str):
 
     # Download the media items to the local folder
     download_media_items(media_items, folder)
+
+def slugify_file_name(origin_file_name):
+    file_base, file_ext = os.path.splitext(origin_file_name)
+    file_base = slugify(file_base)
+    file_name = file_base + file_ext
+    return file_name
 
 def parse_args():
     today = datetime.date.today()
